@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -21,10 +24,7 @@ public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
     
     private RobotContainer m_robotContainer;
-    private DoubleEntry m_leftStickX;
-    private DoubleEntry m_leftStickY;
-    private DoubleEntry m_rightStickX;
-    private DoubleEntry m_rightStickY;
+    private DoubleArraySubscriber dubSub;
     
     /**
     * This function is run when the robot is first started up and should be used for any
@@ -32,6 +32,8 @@ public class Robot extends TimedRobot {
     */
     @Override
     public void robotInit() {
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("robot/websiteJoysticks");
+        dubSub = table.getDoubleArrayTopic("joystickPosition").subscribe(new double[] {});
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
@@ -88,7 +90,12 @@ public class Robot extends TimedRobot {
     
     /** This function is called periodically during operator control. */
     @Override
-    public void teleopPeriodic() {}
+    public void teleopPeriodic() {
+        double[] areas = dubSub.get();
+
+        for (double area : areas)
+            System.out.println(area);
+    }
     
     @Override
     public void testInit() {
@@ -99,7 +106,6 @@ public class Robot extends TimedRobot {
     /** This function is called periodically during test mode. */
     @Override
     public void testPeriodic() {
-        m_rightStickX.set(m_robotContainer.getController().getRightX());
     }
     
     /** This function is called once when the robot is first started up. */
